@@ -24,10 +24,10 @@ public class Users {
     @Version
     private int version; 
 
-    // Default Constructor
+  
     public Users() {}
 
-    // Parameterized Constructor (without id, since it's auto-generated)
+   
     public Users(String name, String email, String phone, String password, Address address) {
         this.name = name;
         this.email = email;
@@ -36,7 +36,7 @@ public class Users {
         this.address = address;
     }
 
-    // Getters and Setters
+   
     public int getId() {
         return id;
     }
