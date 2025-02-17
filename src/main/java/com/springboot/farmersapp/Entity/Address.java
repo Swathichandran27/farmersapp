@@ -15,10 +15,8 @@ public class Address {
     private String zipCode;
     private String country;
 
-    // Default Constructor
     public Address() {}
 
-    // Parameterized Constructor
     public Address(int id, String street, String city, String state, String zipCode, String country) {
         this.id = id;
         this.street = street;
@@ -28,7 +26,6 @@ public class Address {
         this.country = country;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }
