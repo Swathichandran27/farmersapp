@@ -18,21 +18,21 @@ public class ProductCategoryController {
     @Autowired
     private ProductCategoryService categoryService;
 
-    // Create a new category
+    // Create
     @PostMapping
     public ResponseEntity<ProductCategory> createCategory(@RequestBody ProductCategory category) {
         ProductCategory createdCategory = categoryService.createCategory(category);
         return new ResponseEntity<>(createdCategory, HttpStatus.CREATED);
     }
 
-    // Get all categories
+    // Get 
     @GetMapping
     public ResponseEntity<List<ProductCategory>> getAllCategories() {
         List<ProductCategory> categories = categoryService.getAllCategories();
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
-    // Get category by ID
+    // Get 
     @GetMapping("/{id}")
     public ResponseEntity<ProductCategory> getCategoryById(@PathVariable Long id) {
         Optional<ProductCategory> category = categoryService.getCategoryById(id);
@@ -40,7 +40,7 @@ public class ProductCategoryController {
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // Update category
+    // Update 
     @PutMapping("/{id}")
     public ResponseEntity<ProductCategory> updateCategory(@PathVariable Long id, @RequestBody ProductCategory updatedCategory) {
         try {
@@ -51,7 +51,7 @@ public class ProductCategoryController {
         }
     }
 
-    // Delete category
+    // Delete 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);

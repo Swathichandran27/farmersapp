@@ -55,12 +55,12 @@ public class UserService {
             user.setEmail(updatedUser.getEmail());
             user.setPhone(updatedUser.getPhone());
 
-            // Handle password update properly
+           
             if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
                 user.setPassword(updatedUser.getPassword());
             }
 
-            // Update address only if a new one is provided
+            
             if (updatedUser.getAddress() != null) {
                 Address updatedAddress = updatedUser.getAddress();
                 Address existingAddress = user.getAddress();

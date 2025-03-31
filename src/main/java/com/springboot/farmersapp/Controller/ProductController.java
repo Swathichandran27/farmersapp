@@ -1,4 +1,5 @@
 package com.springboot.farmersapp.Controller;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -9,10 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.springboot.farmersapp.Entity.Product;
+import com.springboot.farmersapp.Repository.ProductRepository;
 import com.springboot.farmersapp.Service.ProductService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/products")
@@ -21,18 +24,26 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    // Create a new product
+    @Autowired
+    private ProductRepository productRepo;
+
+    // Create a new product and associate with farmers
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        Product createdProduct = productService.createProduct(product);
-        return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
+    public ResponseEntity<Product> createProduct(
+        @RequestBody Product product, 
+        @RequestParam Set<Long> farmerIds) {
+        
+        System.out.println("Received request to create product: " + product.getName());
+        
+        Product savedProduct = productService.createProduct(product, farmerIds);
+        return ResponseEntity.ok(savedProduct);
     }
+
 
     // Get all products
     @GetMapping
     public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
     }
 
     // Get a product by ID
@@ -42,23 +53,24 @@ public class ProductController {
         return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Update a product
+    // Update a product with farmer associations
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product updatedProduct) {
-        Product product = productService.updateProduct(id, updatedProduct);
+    public ResponseEntity<Product> updateProduct(
+            @PathVariable Long id, 
+            @RequestBody Product updatedProduct, 
+            @RequestParam Set<Long> farmerIds) {
+        Product product = productService.updateProduct(id, updatedProduct, farmerIds);
         return product != null ? ResponseEntity.ok(product) : ResponseEntity.notFound().build();
     }
 
     // Delete a product
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Product deleted successfully");
     }
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String category) {
-        return ResponseEntity.ok(productService.getProductsByCategory(category));
-    }
+
+   
 
     @GetMapping("/in-stock")
     public ResponseEntity<List<Product>> getInStockProducts() {
@@ -68,11 +80,6 @@ public class ProductController {
     @GetMapping("/organic")
     public ResponseEntity<List<Product>> getOrganicProducts() {
         return ResponseEntity.ok(productService.getOrganicProducts());
-    }
-
-    @GetMapping("/seasonal")
-    public ResponseEntity<List<Product>> getSeasonalProducts() {
-        return ResponseEntity.ok(productService.getSeasonalProducts());
     }
 
     @GetMapping("/price-below/{price}")
@@ -85,15 +92,9 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductsInPriceRange(min, max));
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Product>> searchProductsByName(@RequestParam String keyword) {
-        return ResponseEntity.ok(productService.searchProductsByName(keyword));
-    }
+    
 
-    @GetMapping("/quantity-above/{quantity}")
-    public ResponseEntity<List<Product>> getProductsWithHighQuantity(@PathVariable Integer quantity) {
-        return ResponseEntity.ok(productService.getProductsWithHighQuantity(quantity));
-    }
+    // Get paginated products
     @GetMapping("/paginated")
     public ResponseEntity<Page<Product>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
@@ -105,6 +106,7 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page, size, sort);
         return ResponseEntity.ok(productService.getAllProducts(pageable));
     }
+
     @GetMapping("/paginated/category/{category}")
     public ResponseEntity<Page<Product>> getProductsByCategory(
             @PathVariable String category,
@@ -117,5 +119,20 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page, size, sort);
         return ResponseEntity.ok(productService.getProductsByCategory(category, pageable));
     }
-    
+
+    // Get products by farmer ID
+    @GetMapping("/farmer/{farmerId}")
+    public ResponseEntity<List<Product>> getProductsByFarmerId(@PathVariable Long farmerId) {
+        return ResponseEntity.ok(productService.getProductsByFarmerId(farmerId));
+    }
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searchProductsByName(@RequestParam String keyword) {
+        return ResponseEntity.ok(productService.searchProductsByName(keyword));
+    }
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String category) {
+        return ResponseEntity.ok(productService.getProductsByCategory(category));
+    }
+
+   
 }

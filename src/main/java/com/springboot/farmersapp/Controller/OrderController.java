@@ -1,18 +1,10 @@
 package com.springboot.farmersapp.Controller;
 
-
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
+import com.springboot.farmersapp.Entity.Order;
+import com.springboot.farmersapp.Entity.OrderItem;
+import com.springboot.farmersapp.Service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.springboot.farmersapp.Entity.Order;
-import com.springboot.farmersapp.Service.OrderService;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,58 +13,47 @@ import java.util.Optional;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
-    // Create a new order
-    @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
-        Order createdOrder = orderService.createOrder(order);
-        return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
 
     // Get all orders
     @GetMapping
     public ResponseEntity<List<Order>> getAllOrders() {
-        List<Order> orders = orderService.getAllOrders();
-        return new ResponseEntity<>(orders, HttpStatus.OK);
+        return ResponseEntity.ok(orderService.getAllOrders());
     }
 
     // Get order by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable("id") Long id) {
+    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
         Optional<Order> order = orderService.getOrderById(id);
-        return order.map(ResponseEntity::ok)
-                    .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return order.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Update an order
+    // Create a new order
+    @PostMapping
+    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
+        return ResponseEntity.ok(orderService.createOrder(order));
+    }
+
+    // Update an existing order
     @PutMapping("/{id}")
-    public ResponseEntity<Order> updateOrder(@PathVariable("id") Long id, @RequestBody Order updatedOrder) {
-        try {
-            Order order = orderService.updateOrder(id, updatedOrder);
-            return ResponseEntity.ok(order);
-        } catch (RuntimeException ex) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @RequestBody Order orderDetails) {
+        return ResponseEntity.ok(orderService.updateOrder(id, orderDetails));
     }
 
     // Delete an order
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable("id") Long id) {
+    public ResponseEntity<String> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.ok("Order deleted successfully");
     }
-     @GetMapping("/paged")
-    public ResponseEntity<Page<Order>> getOrdersPaged(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "orderDate") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction) {
 
-        Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Order> ordersPage = orderService.getOrders(pageable);
-        return ResponseEntity.ok(ordersPage);
+    // Get all order items for a specific order
+    @GetMapping("/{orderId}/items")
+    public ResponseEntity<List<OrderItem>> getOrderItems(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.getOrderItems(orderId));
     }
 }

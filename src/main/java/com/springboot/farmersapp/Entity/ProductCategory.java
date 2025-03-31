@@ -14,7 +14,7 @@ public class ProductCategory {
     private String categoryName;
     private String description;
 
-    // Constructors
+    
     public ProductCategory() {}
 
     public ProductCategory(String categoryName, String description) {
